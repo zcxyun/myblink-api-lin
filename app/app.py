@@ -8,6 +8,7 @@ import time
 from flask import Flask, request, g
 from flask_cors import CORS
 from lin import Lin
+import app.models
 
 
 def register_blueprints(app):
@@ -73,6 +74,7 @@ def create_app(register_all=True, environment='production'):
         app.config.from_object('app.config.setting.DevelopmentConfig')
         app.config.from_object('app.config.secure.DevelopmentSecure')
     app.config.from_object('app.config.log')
+    app.config.from_object('app.config.wechat')
     if register_all:
         register_blueprints(app)
         Lin(app)

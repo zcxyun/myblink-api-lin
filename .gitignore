@@ -8,3 +8,6 @@ __pycache__
 *.pyc
 *.cpython-36.pyc
 app/assets/*
+migrations/
+logs/
+tests/logs/

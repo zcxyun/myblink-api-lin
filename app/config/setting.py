@@ -25,7 +25,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
 
     # 令牌配置
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=10)
 
     # 插件模块暂时没有开启，以下配置可忽略
     # plugin config写在字典里面

@@ -16,7 +16,7 @@ from lin.jwt import login_required, admin_required, get_tokens
 from lin.log import Logger
 from lin.redprint import Redprint
 
-from app.libs.error_code import RefreshException
+from lin.exception import RefreshException
 from app.validators.forms import LoginForm, RegisterForm, ChangePasswordForm, UpdateInfoForm, \
     AvatarUpdateForm
 

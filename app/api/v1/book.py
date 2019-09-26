@@ -17,14 +17,14 @@ book_api = Redprint('book')
 
 # 这与真实的情况是一致的，因为一般的情况下，重要的接口需要被保护，重要的消息才需要推送
 @book_api.route('/<bid>', methods=['GET'])
-@login_required
+# @login_required
 def get_book(bid):
     book = Book.get_detail(bid)
     return jsonify(book)
 
 
 @book_api.route('/', methods=['GET'])
-@login_required
+# @login_required
 def get_books():
     books = Book.get_all()
     return jsonify(books)
