@@ -8,7 +8,7 @@ from app.libs.error_code import WxCodeException
 from lin.jwt import get_tokens
 from app.libs.wxhelper import WxHelper
 from app.models.member import Member
-from app.validators.api_forms import MemberLoginForm
+from app.validators.v1.member_forms import MemberLoginForm
 
 token_api = Redprint('token')
 
