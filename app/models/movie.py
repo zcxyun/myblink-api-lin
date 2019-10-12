@@ -1,5 +1,7 @@
+from lin import db
+from lin.core import File
 from lin.exception import ParameterException
-from lin.interface import InfoCrud as Base
+from .base import Base
 from sqlalchemy import Column, Integer, String
 
 from app.libs.error_code import MovieNotFound
@@ -15,35 +17,48 @@ class Movie(Base):
         self._fields = ['id', 'title', 'summary']
 
     @classmethod
-    def get_detail(cls, id):
-        movie = cls.query.filter_by(id=id, delete_time=None).first()
-        if not movie:
+    def get_movie(cls, id):
+        movie, img_relative_url, img_id = db.session.query(Movie, File.path, File.id).filter(
+            Movie.img_id == File.id,
+            Movie.id == id,
+            Movie.delete_time == None
+        ).first()
+        if movie is None:
             raise MovieNotFound()
+        movie.img_url = cls._get_file_url(img_relative_url)
+        movie.img_id = img_id
+        movie._fields.extend(['img_url', 'img_id'])
         return movie
 
     @classmethod
-    def get_all(cls):
-        movies = cls.query.filter_by(delete_time=None).all()
-        if not movies:
+    def get_movies(cls, q=None, start=0, count=15):
+        statement = db.session.query(Movie, File.path, File.id).filter(
+            Movie.img_id == File.id,
+            Movie.delete_time == None
+        )
+        if q:
+            statement = statement.filter(Movie.title.ilike('%' + q + '%'))
+        total = statement.count()
+        res = statement.offset(start).limit(count).all()
+        if not res:
             raise MovieNotFound()
-        return movies
-
-    @classmethod
-    def search(cls, q):
-        movies = cls.query.filter(cls.title.ilike('%' + q + '%'), cls.delete_time == None).all()
-        if not movies:
-            raise MovieNotFound()
-        return movies
+        movies = cls._get_models_with_img(res)
+        return {
+            'start': start,
+            'count': count,
+            'total': total,
+            'movies': movies
+        }
 
     @classmethod
     def new_movie(cls, form):
         movie = cls.query.filter_by(title=form.title.data, delete_time=None).first()
-        if movie:
-            raise ParameterException(msg='图书已存在')
+        if movie is not None:
+            raise ParameterException(msg='电影已存在')
         cls.create(
             title=form.title.data,
             summary=form.summary.data,
-            img_id=form.imgId.data,
+            img_id=form.img_id.data,
             commit=True
         )
         return True
@@ -51,12 +66,13 @@ class Movie(Base):
     @classmethod
     def edit_movie(cls, id, form):
         movie = cls.query.filter_by(id=id, delete_time=None).first()
-        if not movie:
-            raise MovieNotFound()
+        if movie is None:
+            raise MovieNotFound(msg='没有找到相关电影')
         movie.update(
+            id=id,
             title=form.title.data,
             summary=form.summary.data,
-            img_id=form.imgId.data,
+            img_id=form.img_id.data,
             commit=True
         )
         return True
@@ -64,7 +80,8 @@ class Movie(Base):
     @classmethod
     def remove_movie(cls, id):
         movie = cls.query.filter_by(id=id, delete_time=None).first()
-        if not movie:
-            raise MovieNotFound()
+        if movie is None:
+            raise MovieNotFound(msg='没有找到相关电影')
+        # 删除图书，软删除
         movie.delete(commit=True)
         return True

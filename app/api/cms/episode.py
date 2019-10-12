@@ -26,15 +26,6 @@ def get_episodes():
     return jsonify(episodes)
 
 
-# @episode_api.route('/search', methods=['GET'])
-# @login_required
-# def search():
-#     form = EpisodeSearchForm().validate_for_api()
-#     start, count = paginate()
-#     episodes = Episode.search_by_keywords(form.q.data, start, count)
-#     return jsonify(episodes)
-
-
 @episode_api.route('', methods=['POST'])
 @login_required
 def create_episode():

@@ -1,6 +1,6 @@
 from lin.exception import ParameterException
-from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, SmallInteger
+from .base import Base
 
 from app.libs.error_code import ClassicNotFound
 

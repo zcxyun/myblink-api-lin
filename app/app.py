@@ -73,8 +73,10 @@ def create_app(register_all=True, environment='production'):
     elif env == 'development':
         app.config.from_object('app.config.setting.DevelopmentConfig')
         app.config.from_object('app.config.secure.DevelopmentSecure')
-    app.config.from_object('app.config.log')
+    # 加载其他配置文件：
     app.config.from_object('app.config.wechat')
+    app.config.from_object('app.config.log')
+    app.config.from_object('app.extensions.file.config')
     if register_all:
         register_blueprints(app)
         Lin(app)

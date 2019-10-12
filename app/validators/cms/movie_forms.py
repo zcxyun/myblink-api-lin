@@ -5,8 +5,8 @@ from wtforms.validators import DataRequired, NumberRange
 
 class CreateOrUpdateMovieForm(Form):
     title = StringField(validators=[DataRequired(message='电影标题不能为空')])
-    summary = StringField(validators=[DataRequired(message='电影简介不能为空')])
-    imgId = IntegerField(validators=[DataRequired(message='电影主图ID不能为空'),
+    summary = StringField(validators=[DataRequired(message='电影摘要不能为空')])
+    img_id = IntegerField(validators=[DataRequired(message='电影主图ID不能为空'),
                                      NumberRange(min=1, message='电影主图ID必须是正整数')])
 
 

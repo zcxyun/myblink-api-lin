@@ -6,8 +6,10 @@ from lin.core import Group, User, Auth
 from lin.db import db
 
 from app.app import create_app
+from app.models.episode import Episode
 
 app = create_app()
+
 
 def group():
     group = Group()
@@ -27,7 +29,18 @@ def group():
     auth.module = '图书'
     auth.group_id = group.id
     db.session.add(auth)
+
+
+def episode():
+    episodes = Episode.query.filter(Episode.delete_time != None).all()
+    for episode in episodes:
+        episode.update(
+            delete_time=None
+        )
+        db.session.add(episode)
+
+
 with app.app_context():
     with db.auto_commit():
-        group()
-
+        # group()
+        episode()

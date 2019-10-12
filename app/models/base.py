@@ -22,10 +22,10 @@ class Base(InfoCrud):
             res.append(model)
         return res
 
-    # @classmethod
-    # def get_total(cls, q=None):
-    #     statement = cls.query.filter()
-    #     if q:
-    #         statement = cls.query.filter(cls.title.ilike('%' + q + '%'))
-    #     total = statement.count()
-    #     return total
+    @classmethod
+    def get_total(cls, q=None):
+        statement = cls.query.filter()
+        if q:
+            statement = cls.query.filter(cls.title.ilike('%' + q + '%'))
+        total = statement.count()
+        return total

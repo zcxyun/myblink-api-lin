@@ -3,8 +3,8 @@
     :license: MIT, see LICENSE for more details.
 """
 from lin.exception import NotFound, ParameterException
-from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, String, Integer
+from .base import Base
 
 from app.libs.error_code import BookNotFound
 

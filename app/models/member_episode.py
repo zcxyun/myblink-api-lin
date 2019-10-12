@@ -1,5 +1,5 @@
-from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, Integer, SmallInteger
+from .base import Base
 
 
 class MemberEpisode(Base):

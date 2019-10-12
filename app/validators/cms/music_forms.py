@@ -5,11 +5,11 @@ from wtforms.validators import DataRequired, NumberRange
 
 class CreateOrUpdateMusicForm(Form):
     title = StringField(validators=[DataRequired(message='音乐标题不能为空')])
-    summary = StringField(validators=[DataRequired(message='音乐简介不能为空')])
-    imgId = IntegerField(validators=[DataRequired(message='音乐主图ID不能为空'),
+    summary = StringField(validators=[DataRequired(message='音乐摘要不能为空')])
+    img_id = IntegerField(validators=[DataRequired(message='音乐主图ID不能为空'),
                                      NumberRange(min=1, message='音乐主图ID必须是正整数')])
-    urlId = IntegerField(validators=[DataRequired(message='音乐文件ID不能为空'),
-                                     NumberRange(min=1, message='音乐文件ID必须是正整数')])
+    voice_id = IntegerField(validators=[DataRequired(message='音频文件ID不能为空'),
+                                     NumberRange(min=1, message='音频文件ID必须是正整数')])
 
 
 class MusicSearchForm(Form):

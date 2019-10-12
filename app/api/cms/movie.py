@@ -1,10 +1,11 @@
-from flask import jsonify
+from flask import jsonify, request
 from lin import login_required
 from lin.exception import Success
 from lin.redprint import Redprint
 
+from app.libs.utils import paginate
 from app.models.movie import Movie
-from app.validators.cms.movie_forms import MovieSearchForm, CreateOrUpdateMovieForm
+from app.validators.cms.movie_forms import CreateOrUpdateMovieForm
 
 movie_api = Redprint('movie')
 
@@ -12,26 +13,20 @@ movie_api = Redprint('movie')
 @movie_api.route('/<int:id>', methods=['GET'])
 @login_required
 def get_movie(id):
-    movie = Movie.get_detail(id)
+    movie = Movie.get_movie(id)
     return jsonify(movie)
 
 
-@movie_api.route('/', methods=['GET'])
+@movie_api.route('', methods=['GET'])
 @login_required
 def get_movies():
-    movies = Movie.get_all()
+    start, count = paginate()
+    q = request.args.get('q', None)
+    movies = Movie.get_movies(q, start, count)
     return jsonify(movies)
 
 
-@movie_api.route('/search', methods=['GET'])
-@login_required
-def search():
-    form = MovieSearchForm().validate_for_api()
-    movies = Movie.search(form.q.data)
-    return jsonify(movies)
-
-
-@movie_api.route('/', methods=['POST'])
+@movie_api.route('', methods=['POST'])
 @login_required
 def create_movie():
     form = CreateOrUpdateMovieForm().validate_for_api()

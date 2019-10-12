@@ -1,10 +1,11 @@
-from flask import jsonify
+from flask import jsonify, request
 from lin import login_required
 from lin.exception import Success
 from lin.redprint import Redprint
 
+from app.libs.utils import paginate
 from app.models.music import Music
-from app.validators.cms.music_forms import MusicSearchForm, CreateOrUpdateMusicForm
+from app.validators.cms.music_forms import CreateOrUpdateMusicForm
 
 music_api = Redprint('music')
 
@@ -12,26 +13,20 @@ music_api = Redprint('music')
 @music_api.route('/<int:id>', methods=['GET'])
 @login_required
 def get_music(id):
-    music = Music.get_detail(id)
+    music = Music.get_music(id)
     return jsonify(music)
 
 
-@music_api.route('/', methods=['GET'])
+@music_api.route('', methods=['GET'])
 @login_required
 def get_musics():
-    musics = Music.get_all()
+    start, count = paginate()
+    q = request.args.get('q', None)
+    musics = Music.get_musics(q, start, count)
     return jsonify(musics)
 
 
-@music_api.route('/search', methods=['GET'])
-@login_required
-def search():
-    form = MusicSearchForm().validate_for_api()
-    musics = Music.search(form.q.data)
-    return jsonify(musics)
-
-
-@music_api.route('/', methods=['POST'])
+@music_api.route('', methods=['POST'])
 @login_required
 def create_music():
     form = CreateOrUpdateMusicForm().validate_for_api()

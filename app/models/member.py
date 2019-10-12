@@ -1,6 +1,5 @@
-from lin.interface import InfoCrud as Base
 from sqlalchemy import Column, String, Integer, SmallInteger
-
+from .base import Base
 from app.libs.enum import GenderEnum, MemberActive
 from app.libs.error_code import GenderStatusException
 
