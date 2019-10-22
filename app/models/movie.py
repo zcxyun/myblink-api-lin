@@ -9,8 +9,8 @@ from app.libs.error_code import MovieNotFound
 
 class Movie(Base):
     id = Column(Integer, primary_key=True)
-    title = Column(String(30), nullable=False, comment='电影标题')
-    summary = Column(String(50), nullable=False, comment='电影简介')
+    title = Column(String(30), nullable=False, unique=True, comment='电影标题')
+    summary = Column(String(50), nullable=False, comment='电影摘要')
     img_id = Column(Integer, comment='电影图片id 文件表外键')
 
     def _set_fields(self):
@@ -31,15 +31,16 @@ class Movie(Base):
         return movie
 
     @classmethod
-    def get_movies(cls, q=None, start=0, count=15):
+    def get_movies(cls, q='', start=0, count=15):
+        search_key = '%{}%'.format(q)
         statement = db.session.query(Movie, File.path, File.id).filter(
             Movie.img_id == File.id,
             Movie.delete_time == None
         )
         if q:
-            statement = statement.filter(Movie.title.ilike('%' + q + '%'))
+            statement = statement.filter(Movie.title.ilike(search_key))
         total = statement.count()
-        res = statement.offset(start).limit(count).all()
+        res = statement.order_by(Movie.id.desc()).offset(start).limit(count).all()
         if not res:
             raise MovieNotFound()
         movies = cls._get_models_with_img(res)

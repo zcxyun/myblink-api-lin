@@ -1,10 +1,11 @@
-from flask import jsonify
+from flask import jsonify, request
 from lin import route_meta, group_required, login_required
 from lin.exception import Success
 from lin.redprint import Redprint
 
+from app.libs.utils import paginate
 from app.models.book import Book
-from app.validators.forms import BookSearchForm, CreateOrUpdateBookForm
+from app.validators.cms.book_forms import CreateOrUpdateBookForm
 
 book_api = Redprint('book')
 
@@ -12,26 +13,20 @@ book_api = Redprint('book')
 @book_api.route('/<bid>', methods=['GET'])
 @login_required
 def get_book(bid):
-    book = Book.get_detail(bid)
+    book = Book.get_book(bid)
     return jsonify(book)
 
 
-@book_api.route('/', methods=['GET'])
+@book_api.route('', methods=['GET'])
 @login_required
 def get_books():
-    books = Book.get_all()
+    start, count = paginate()
+    q = request.args.get('q', '')
+    books = Book.get_books(q, start, count)
     return jsonify(books)
 
 
-@book_api.route('/search', methods=['GET'])
-@login_required
-def search():
-    form = BookSearchForm().validate_for_api()
-    books = Book.search_by_keywords(form.q.data)
-    return jsonify(books)
-
-
-@book_api.route('/', methods=['POST'])
+@book_api.route('', methods=['POST'])
 @login_required
 def create_book():
     form = CreateOrUpdateBookForm().validate_for_api()

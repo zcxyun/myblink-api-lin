@@ -13,16 +13,16 @@ class Classic(Base):
     def _set_fields(self):
         self._fields = ['index', 'type']
 
-    @classmethod
-    def get_detail(cls, index):
-        classic = cls.query.filter_by(index=index, delete_time=None).first()
-        if not classic:
-            raise ClassicNotFound()
-        return classic
+    # @classmethod
+    # def get_classic(cls, index):
+    #     classic = cls.query.filter_by(index=index, delete_time=None).first()
+    #     if not classic:
+    #         raise ClassicNotFound()
+    #     return classic
 
     @classmethod
-    def get_all(cls):
-        classics = cls.query.filter_by(delete_time=None).first()
+    def get_classics(cls, start=0, count=15):
+        classics = cls.query.filter_by(delete_time=None).offset(start).limit(count).all()
         if not classics:
             raise ClassicNotFound()
         return classics
@@ -43,17 +43,17 @@ class Classic(Base):
         )
         return True
 
-    @classmethod
-    def edit_classic(cls, index, form):
-        classic = cls.query.filter_by(index=index, delete_time=None).first()
-        if not classic:
-            raise ClassicNotFound()
-        classic.update(
-            classic_id=form.classicId.data,
-            type=form.type.data,
-            commit=True
-        )
-        return True
+    # @classmethod
+    # def edit_classic(cls, index, form):
+    #     classic = cls.query.filter_by(index=index, delete_time=None).first()
+    #     if not classic:
+    #         raise ClassicNotFound()
+    #     classic.update(
+    #         classic_id=form.classicId.data,
+    #         type=form.type.data,
+    #         commit=True
+    #     )
+    #     return True
 
     @classmethod
     def remove_classic(cls, index):

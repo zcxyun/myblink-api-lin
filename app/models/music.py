@@ -10,8 +10,8 @@ from app.libs.error_code import MusicNotFound
 
 class Music(Base):
     id = Column(Integer, primary_key=True)
-    title = Column(String(30), nullable=False, comment='音乐标题')
-    summary = Column(String(50), nullable=False, comment='音乐简介')
+    title = Column(String(30), nullable=False, unique=True, comment='音乐标题')
+    summary = Column(String(50), nullable=False, comment='音乐摘要')
     img_id = Column(Integer, comment='音乐图片id 文件表外键')
     voice_id = Column(Integer, comment='音乐链接id 文件表外键')
 
@@ -51,7 +51,8 @@ class Music(Base):
         return res
 
     @classmethod
-    def get_musics(cls, q=None, start=0, count=15):
+    def get_musics(cls, q='', start=0, count=15):
+        search_key = '%{}%'.format(q)
         Image = aliased(File)
         Voice = aliased(File)
         statement = db.session.query(Music, Image.path, Image.id, Voice.path, Voice.id).filter(
@@ -60,9 +61,9 @@ class Music(Base):
             Music.delete_time == None
         )
         if q:
-            statement = statement.filter(Music.title.ilike('%' + q + '%'))
+            statement = statement.filter(Music.title.ilike(search_key))
         total = statement.count()
-        res = statement.offset(start).limit(count).all()
+        res = statement.order_by(Music.id.desc()).offset(start).limit(count).all()
         if not res:
             raise MusicNotFound()
         musics = cls.get_musics_with_img_voice(res)

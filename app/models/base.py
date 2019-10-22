@@ -1,6 +1,6 @@
 from flask import current_app
 from lin.interface import InfoCrud
-import os
+import os, re
 
 
 class Base(InfoCrud):
@@ -23,9 +23,13 @@ class Base(InfoCrud):
         return res
 
     @classmethod
-    def get_total(cls, q=None):
+    def _get_total(cls, q=None):
         statement = cls.query.filter()
         if q:
             statement = cls.query.filter(cls.title.ilike('%' + q + '%'))
         total = statement.count()
         return total
+
+    @classmethod
+    def _handle_new_line(cls, text):
+        return re.sub(r'\\n', '\\n       ', text) if type(text) == str else ''

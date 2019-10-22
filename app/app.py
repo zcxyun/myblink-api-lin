@@ -5,10 +5,13 @@
 import json
 import time
 
+# import app.models
 from flask import Flask, request, g
 from flask_cors import CORS
 from lin import Lin
-import app.models
+from flask_caching import Cache
+
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 
 def register_blueprints(app):
@@ -83,6 +86,7 @@ def create_app(register_all=True, environment='production'):
         register_before_request(app)
         register_after_request(app)
         apply_cors(app)
+        cache.init_app(app)
         # 创建所有表格
         create_tables(app)
 

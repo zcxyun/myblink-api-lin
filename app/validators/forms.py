@@ -151,8 +151,8 @@ class BookSearchForm(Form):
     q = StringField(validators=[DataRequired(message='必须传入搜索关键字')])  # 前端的请求参数中必须携带`q`
 
 
-class CreateOrUpdateBookForm(Form):
-    title = StringField(validators=[DataRequired(message='必须传入图书名')])
-    author = StringField(validators=[DataRequired(message='必须传入图书作者')])
-    summary = StringField(validators=[DataRequired(message='必须传入图书综述')])
-    image = StringField(validators=[DataRequired(message='必须传入图书插图')])
+# class CreateOrUpdateBookForm(Form):
+#     title = StringField(validators=[DataRequired(message='必须传入图书名')])
+#     author = StringField(validators=[DataRequired(message='必须传入图书作者')])
+#     summary = StringField(validators=[DataRequired(message='必须传入图书综述')])
+#     image = StringField(validators=[DataRequired(message='必须传入图书插图')])

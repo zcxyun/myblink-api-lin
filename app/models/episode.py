@@ -9,8 +9,8 @@ from .base import Base
 
 class Episode(Base):
     id = Column(Integer, primary_key=True)
-    title = Column(String(30), nullable=False, comment='句子标题')
-    summary = Column(String(50), nullable=False, comment='句子简介')
+    title = Column(String(30), nullable=False, unique=True, comment='句子标题')
+    summary = Column(String(50), nullable=False, comment='句子摘要')
     img_id = Column(Integer, comment='句子图片id 文件表外键')
 
     def _set_fields(self):
@@ -31,15 +31,16 @@ class Episode(Base):
         return episode
 
     @classmethod
-    def get_episodes(cls, q=None, start=0, count=15):
+    def get_episodes(cls, q='', start=0, count=15):
+        search_key = '%{}%'.format(q)
         statement = db.session.query(Episode, File.path, File.id).filter(
             Episode.img_id == File.id,
             Episode.delete_time == None
         )
         if q:
-            statement = statement.filter(Episode.title.ilike('%' + q + '%'))
+            statement = statement.filter(Episode.title.ilike(search_key))
         total = statement.count()
-        res = statement.offset(start).limit(count).all()
+        res = statement.order_by(Episode.id.desc()).offset(start).limit(count).all()
         if not res:
             raise EpisodeNotFound()
         episodes = cls._get_models_with_img(res)
