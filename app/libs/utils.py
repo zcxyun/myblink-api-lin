@@ -15,12 +15,10 @@ def get_timestamp(fmt='%Y-%m-%d %H:%M:%S'):
 
 
 def paginate():
-    count = int(request.args.get('count', current_app.config.get('COUNT_DEFAULT') if current_app.config.get(
-        'COUNT_DEFAULT') else 1))
-    start = int(request.args.get('page', current_app.config.get('PAGE_DEFAULT') if current_app.config.get(
-        'PAGE_DEFAULT') else 0))
+    count = int(request.args.get('count', current_app.config.get('COUNT_DEFAULT', 1)))
+    page = int(request.args.get('page', current_app.config.get('PAGE_DEFAULT', 1))) - 1
     count = 15 if count >= 15 else count
-    start = start * count
+    start = page * count
     if start < 0 or count < 0:
         raise ParameterException()
     return start, count
