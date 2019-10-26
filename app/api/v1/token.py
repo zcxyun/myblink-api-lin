@@ -43,7 +43,7 @@ def get():
                 openid=openid,
                 nickName=form.nickName.data,
                 avatarUrl=form.avatarUrl.data,
-                _gender=form.gender.data,
+                gender=form.gender.data,
                 country=form.country.data,
                 province=form.province.data,
                 city=form.city.data,

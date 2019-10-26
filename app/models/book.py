@@ -5,14 +5,13 @@
 import json
 
 from lin import db
-from lin.exception import ParameterException
+from lin.exception import ParameterException, NotFound
 from sqlalchemy import Column, String, Integer, or_
 
-from app.libs.error_code import BookNotFound
+from app.app import cache
 from app.libs.spider import BookSpider
 from app.libs.utils import is_isbn_or_key
 from .base import Base
-from app.app import cache
 
 
 class Book(Base):
@@ -51,13 +50,6 @@ class Book(Base):
     def translator(self, value):
         res = value if value else []
         self._translator = json.dumps(res, ensure_ascii=False)
-
-    @classmethod
-    def get_book(cls, bid):
-        book = cls.query.filter_by(id=bid, delete_time=None).first()
-        if book is None:
-            raise BookNotFound()
-        return book
 
     @classmethod
     def get_books(cls, q='', start=0, count=15):
@@ -101,7 +93,7 @@ class Book(Base):
         else:
             res = BookSpider.search_by_keyword(q, start, count)
         if not res['books']:
-            raise BookNotFound()
+            raise NotFound(msg='相关书籍不存在')
         return res
 
     @classmethod
@@ -114,59 +106,50 @@ class Book(Base):
                     book.summary = cls._handle_new_line(book.summary)
                 db.session.add(book)
 
-    @classmethod
-    def new_book(cls, form):
-        book = cls.query.filter_by(title=form.title.data, delete_time=None).first()
-        if book is not None:
-            raise ParameterException(msg='图书已存在')
+    # @classmethod
+    # def new_book(cls, form):
+    #     book = cls.query.filter_by(title=form.title.data, delete_time=None).first()
+    #     if book is not None:
+    #         raise ParameterException(msg='图书已存在')
+    #
+    #     Book.create(
+    #         title=form.title.data,
+    #         subtitle=form.subtitle.data,
+    #         author=form.author.data,
+    #         summary=form.summary.data,
+    #         category=form.category.data,
+    #         binding=form.binding.data,
+    #         publisher=form.publisher.data,
+    #         price=form.price.data,
+    #         pages=form.pages.data,
+    #         pubdate=form.pubdate.data,
+    #         isbn=form.isbn.data,
+    #         translator=form.translator.data,
+    #         image=form.image.data,
+    #         commit=True
+    #     )
+    #     return True
 
-        Book.create(
-            title=form.title.data,
-            subtitle=form.subtitle.data,
-            author=form.author.data,
-            summary=form.summary.data,
-            category=form.category.data,
-            binding=form.binding.data,
-            publisher=form.publisher.data,
-            price=form.price.data,
-            pages=form.pages.data,
-            pubdate=form.pubdate.data,
-            isbn=form.isbn.data,
-            translator=form.translator.data,
-            image=form.image.data,
-            commit=True
-        )
-        return True
-
-    @classmethod
-    def edit_book(cls, bid, form):
-        book = cls.query.filter_by(id=bid, delete_time=None).first()
-        if book is None:
-            raise BookNotFound()
-        book.update(
-            id=bid,
-            title=form.title.data,
-            subtitle=form.subtitle.data,
-            author=form.author.data,
-            summary=form.summary.data,
-            category=form.category.data,
-            binding=form.binding.data,
-            publisher=form.publisher.data,
-            price=form.price.data,
-            pages=form.pages.data,
-            pubdate=form.pubdate.data,
-            isbn=form.isbn.data,
-            translator=form.translator.data,
-            image=form.image.data,
-            commit=True
-        )
-        return True
-
-    @classmethod
-    def remove_book(cls, bid):
-        book = cls.query.filter_by(id=bid, delete_time=None).first()
-        if book is None:
-            raise BookNotFound()
-        # 删除图书，软删除
-        book.delete(commit=True)
-        return True
+    # @classmethod
+    # def edit_book(cls, bid, form):
+    #     book = cls.query.filter_by(id=bid, delete_time=None).first()
+    #     if book is None:
+    #         raise NotFound(msg='相关书籍不存在')
+    #     book.update(
+    #         id=bid,
+    #         title=form.title.data,
+    #         subtitle=form.subtitle.data,
+    #         author=form.author.data,
+    #         summary=form.summary.data,
+    #         category=form.category.data,
+    #         binding=form.binding.data,
+    #         publisher=form.publisher.data,
+    #         price=form.price.data,
+    #         pages=form.pages.data,
+    #         pubdate=form.pubdate.data,
+    #         isbn=form.isbn.data,
+    #         translator=form.translator.data,
+    #         image=form.image.data,
+    #         commit=True
+    #     )
+    #     return True

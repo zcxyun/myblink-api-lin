@@ -1,5 +1,6 @@
 from lin import db
 from lin.core import File
+from lin.exception import NotFound
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import aliased
 
@@ -18,7 +19,7 @@ class Music(Base):
         self._fields = ['id', 'title', 'summary', '_is_classic']
 
     @classmethod
-    def get_model_with_img_voice(cls, id):
+    def get_model_with_img_voice(cls, id, *, err_msg=None):
         Image = aliased(File)
         Voice = aliased(File)
         model, img_relative_url, voice_relative_url, img_id, voice_id = db.session.query(
@@ -29,7 +30,11 @@ class Music(Base):
                 cls.delete_time == None
             ).first()
         if model is None:
-            return None
+            if err_msg is None:
+                return None
+            else:
+                raise NotFound(msg=err_msg)
+
         model.img_url = cls._get_file_url(img_relative_url)
         model.voice_url = cls._get_file_url(voice_relative_url)
         model.img_id = img_id
@@ -38,7 +43,7 @@ class Music(Base):
         return model
 
     @classmethod
-    def get_paginate_models_with_img_voice(cls, start, count, q=None):
+    def get_paginate_models_with_img_voice(cls, start, count, q=None, *, err_msg=None):
         Image = aliased(File)
         Voice = aliased(File)
         statement = db.session.query(cls, Image.path, Image.id, Voice.path, Voice.id).filter(
@@ -52,7 +57,11 @@ class Music(Base):
         total = statement.count()
         res = statement.order_by(cls.id.desc()).offset(start).limit(count).all()
         if not res:
-            return None
+            if err_msg is None:
+                return None
+            else:
+                raise NotFound(msg=err_msg)
+
         models = cls._add_img_voice_to_model(res)
         return {
             'start': start,

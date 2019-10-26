@@ -22,8 +22,6 @@ classic_api = Redprint('classic')
 def get_classics():
     start, count = paginate()
     classics = Classic.get_paginate_models(start, count)
-    if not classics:
-        raise NotFound(msg='相关期刊不存在')
     return jsonify(classics)
 
 

@@ -13,9 +13,7 @@ episode_api = Redprint('episode')
 @episode_api.route('/<bid>', methods=['GET'])
 @login_required
 def get_episode(bid):
-    episode = Episode.get_model_with_img(bid)
-    if episode is None:
-        raise NotFound(msg='相关句子不存在')
+    episode = Episode.get_model_with_img(bid, err_msg='相关句子不存在')
     return jsonify(episode)
 
 
@@ -24,9 +22,7 @@ def get_episode(bid):
 def get_episodes():
     start, count = paginate()
     q = request.args.get('q', None)
-    episodes = Episode.get_paginate_models_with_img(start, count, q)
-    if not episodes:
-        raise NotFound(msg='相关句子不存在')
+    episodes = Episode.get_paginate_models_with_img(start, count, q, err_msg='相关句子不存在')
     return jsonify(episodes)
 
 

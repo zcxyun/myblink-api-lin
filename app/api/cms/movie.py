@@ -13,9 +13,7 @@ movie_api = Redprint('movie')
 @movie_api.route('/<int:id>', methods=['GET'])
 @login_required
 def get_movie(id):
-    movie = Movie.get_model_with_img(id)
-    if movie is None:
-        raise NotFound(msg='相关电影不存在')
+    movie = Movie.get_model_with_img(id, err_msg='相关电影不存在')
     return jsonify(movie)
 
 
@@ -24,9 +22,7 @@ def get_movie(id):
 def get_movies():
     start, count = paginate()
     q = request.args.get('q', None)
-    movies = Movie.get_paginate_models_with_img(start, count, q)
-    if not movies:
-        raise NotFound(msg='相关电影不存在')
+    movies = Movie.get_paginate_models_with_img(start, count, q, err_msg='相关电影不存在')
     return jsonify(movies)
 
 

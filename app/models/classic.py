@@ -3,7 +3,6 @@ from lin.exception import ParameterException, NotFound
 from sqlalchemy import Column, Integer, SmallInteger
 
 from app.libs.enum import ClassicType, IsClassic
-from app.libs.error_code import ClassicNotFound, MovieNotFound, MusicNotFound, EpisodeNotFound
 from app.models.episode import Episode
 from app.models.movie import Movie
 from app.models.music import Music
@@ -33,12 +32,12 @@ class Classic(Base):
         self.type = data.value
 
     @classmethod
-    def get_paginate_models(cls, start, count, q=None):
+    def get_paginate_models(cls, start, count, q=None, *, err_msg=None):
         statement = cls.query
         total = statement.count()
         classics = statement.order_by(cls.index.desc()).offset(start).limit(count).all()
         if not classics:
-            raise ClassicNotFound()
+            raise NotFound(msg='相关期刊不存在')
         movie_ids = []
         music_ids = []
         episode_ids = []
@@ -65,7 +64,7 @@ class Classic(Base):
         episodes = cls._combine_data(classic_episodes, episodes)
         data = movies + musics + episodes
         if not data:
-            return []
+            raise NotFound(msg='期刊原数据不存在')
         data.sort(key=lambda x: x.index, reverse=True)
         return {
             'start': start,
@@ -100,7 +99,7 @@ class Classic(Base):
         with db.auto_commit():
             classic = cls.query.filter_by(**data, delete_time=None).first()
             if not classic:
-                raise ClassicNotFound()
+                raise NotFound(msg='相关期刊不存在')
             cls._update_is_classic(classic, IsClassic.NO)
             classic.delete()
         return True

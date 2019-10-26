@@ -13,9 +13,7 @@ music_api = Redprint('music')
 @music_api.route('/<int:id>', methods=['GET'])
 @login_required
 def get_music(id):
-    music = Music.get_model_with_img_voice(id)
-    if music is None:
-        raise NotFound(msg='相关音乐不存在')
+    music = Music.get_model_with_img_voice(id, err_msg='相关音乐不存在')
     return jsonify(music)
 
 
@@ -24,9 +22,7 @@ def get_music(id):
 def get_musics():
     start, count = paginate()
     q = request.args.get('q', None)
-    musics = Music.get_paginate_models_with_img_voice(start, count, q)
-    if not musics:
-        raise NotFound(msg='相关音乐不存在')
+    musics = Music.get_paginate_models_with_img_voice(start, count, q, err_msg='相关音乐不存在')
     return jsonify(musics)
 
 

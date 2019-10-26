@@ -20,6 +20,7 @@ def create_cms():
     from .episode import episode_api
     from .music import music_api
     from .classic import classic_api
+    from .member import member_api
     admin_api.register(cms)
     user_api.register(cms)
     log_api.register(cms)
@@ -30,4 +31,5 @@ def create_cms():
     movie_api.register(cms)
     music_api.register(cms)
     classic_api.register(cms)
+    member_api.register(cms)
     return cms
