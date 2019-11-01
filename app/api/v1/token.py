@@ -1,11 +1,11 @@
 from flask import jsonify
-from flask_jwt_extended import verify_jwt_refresh_token_in_request, get_jwt_identity, create_access_token, \
+from flask_jwt_extended import get_jwt_identity, create_access_token, \
     create_refresh_token
 from lin.exception import RefreshException, NotFound
 from lin.redprint import Redprint
 
 from app.libs.error_code import WxCodeException
-from lin.jwt import get_tokens
+from app.libs.jwt_api import get_member_tokens, verify_member_refresh_token
 from app.libs.wxhelper import WxHelper
 from app.models.member import Member
 from app.validators.v1.member_forms import MemberLoginForm
@@ -16,7 +16,7 @@ token_api = Redprint('token')
 @token_api.route('/refresh', methods=['GET'])
 def refresh():
     try:
-        verify_jwt_refresh_token_in_request()
+        verify_member_refresh_token()
     except Exception:
         return RefreshException()
 
@@ -49,7 +49,7 @@ def get():
                 city=form.city.data,
                 commit=True
             )
-        access_token, refresh_token = get_tokens(member)
+        access_token, refresh_token = get_member_tokens(member)
     else:
         raise WxCodeException()
 

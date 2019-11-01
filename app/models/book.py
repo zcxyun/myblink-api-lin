@@ -87,6 +87,7 @@ class Book(Base):
 
     @classmethod
     def get_books_from_api(cls, q, start, count):
+        """从互联网中获取数据"""
         search_type = is_isbn_or_key(q)
         if search_type == 'isbn':
             res = BookSpider.search_by_isbn(q)
@@ -98,6 +99,7 @@ class Book(Base):
 
     @classmethod
     def __new_books_from_api(cls, data):
+        """将网上数据添加到数据库"""
         with db.auto_commit():
             for book_dict in data:
                 book = Book()

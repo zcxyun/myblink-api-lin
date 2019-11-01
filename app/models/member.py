@@ -33,6 +33,7 @@ class Member(Base):
 
     @classmethod
     def get_paginate_models(cls, start, count, q=None, *, err_msg=None):
+        """分页查询会员模型(支持搜索)"""
         statement = cls.query.filter_by(delete_time=None)
         if q:
             search_key = '%{}%'.format(q)
