@@ -49,7 +49,7 @@ def test_delete():
 
 def test_get_books():
     with app.test_client() as c:
-        rv = c.get('/v1/book/')
+        rv = c.get('/v1/book')
         json_data = rv.get_json()
         print(json_data)
         assert rv.status_code == 200

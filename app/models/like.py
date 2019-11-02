@@ -13,12 +13,26 @@ class Like(Base):
     type = Column(SmallInteger, comment='点赞类型,这里的类型分为: 100 电影 200 音乐 300 句子')
     like_status = Column(Boolean, default=False, comment='是否点赞')
 
+    @property
+    def type_enum(self):
+        try:
+            res = ClassicType(self.type)
+        except ValueError:
+            return None
+        return res
+
+    @type_enum.setter
+    def type_enum(self, data):
+        if type(data) != ClassicType:
+            raise ParameterException(msg='期刊类型不正确')
+        self.type = data.value
+
     @classmethod
     def like(cls, classic_type, content_id, member_id):
         """点赞"""
-        cls._validate_classic_type(classic_type)
+        cls.validate_classic_type(classic_type)
         data = {
-            'type': classic_type.value,
+            'type': classic_type,
             'content_id': content_id,
             'member_id': member_id
         }
@@ -38,9 +52,9 @@ class Like(Base):
     @classmethod
     def unlike(cls, classic_type, content_id, member_id):
         """取消点赞"""
-        cls._validate_classic_type(classic_type)
+        cls.validate_classic_type(classic_type)
         data = {
-            'type': classic_type.value,
+            'type': classic_type,
             'content_id': content_id,
             'member_id': member_id
         }
@@ -60,10 +74,10 @@ class Like(Base):
     @classmethod
     def get_like_counts_for_types(cls, classic_type, content_ids):
         """获取某一期刊类型点赞的总数量"""
-        cls._validate_classic_type(classic_type)
+        cls.validate_classic_type(classic_type)
         res = db.session.query(cls.content_id, func.count(cls.content_id).label('like_count')).filter_by(
             delete_time=None,
-            type=classic_type.value,
+            type=classic_type,
             like_status=True
         ).filter(cls.content_id.in_(content_ids)).group_by(cls.content_id).all()
         if not res:
@@ -73,10 +87,10 @@ class Like(Base):
     @classmethod
     def get_like_count_for_type(cls, classic_type, content_id):
         """获取某一期刊点赞的总数量"""
-        cls._validate_classic_type(classic_type)
+        cls.validate_classic_type(classic_type)
         total = cls.query.filter_by(
             delete_time=None,
-            type=classic_type.value,
+            type=classic_type,
             like_status=True,
             content_id=content_id
         ).count()
@@ -85,17 +99,30 @@ class Like(Base):
     @classmethod
     def get_like_status_for_member(cls, member_id, classic_type, content_id):
         """获取某一会员点赞状态"""
-        cls._validate_classic_type(classic_type)
+        cls.validate_classic_type(classic_type)
         model = cls.query.filter_by(
             delete_time=None,
-            type=classic_type.value,
+            type=classic_type,
             content_id=content_id,
             member_id=member_id
         ).first()
         return model.like_status if model else False
 
     @classmethod
-    def _validate_classic_type(cls, classic_type):
+    def get_likes_for_member(cls, member_id):
+        """获取某一会员的所有点赞模型"""
+        models = cls.query.filter_by(
+            delete_time=None,
+            member_id=member_id,
+            like_status=True
+        ).all()
+        return models if models else []
+
+    @classmethod
+    def validate_classic_type(cls, classic_type):
         """校验期刊类型"""
-        if type(classic_type) != ClassicType:
+        try:
+            _ = ClassicType(classic_type)
+        except ValueError:
             raise ParameterException(msg='要点赞的表类型不正确')
+

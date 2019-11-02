@@ -35,7 +35,7 @@ class Classic(Base):
     @classmethod
     def get_latest(cls):
         """查询最近的期刊"""
-        _, classic = db.session.query(func.max(cls.index), cls).filter_by(delete_time=None).first()
+        classic = cls.query.filter_by(delete_time=None).order_by(cls.index.desc()).first()
         if not classic:
             raise NotFound(msg='找不到指定期刊')
         res = cls._get_single_data(classic)
@@ -58,6 +58,60 @@ class Classic(Base):
         return res
 
     @classmethod
+    def get_detail(cls, type, id):
+        classic = cls.query.filter_by(delete_time=None, type=type, classic_id=id).first()
+        if not classic:
+            raise NotFound(msg='找不到指定期刊')
+        res = cls._get_single_data(classic)
+        return res
+
+    @classmethod
+    def get_like(cls, classic_type, content_id, member_id):
+        fav_nums = Like.get_like_count_for_type(classic_type, content_id)
+        like_status = Like.get_like_status_for_member(member_id, classic_type, content_id)
+        return {
+            'fav_nums': fav_nums,
+            'like_status': like_status,
+            'id': content_id
+        }
+
+    @classmethod
+    def get_favor(cls, member_id, start, count):
+        likes = Like.get_likes_for_member(member_id)
+        movie_ids = []
+        music_ids = []
+        episode_ids = []
+        if likes:
+            movie_ids = [like.content_id for like in likes if like.type_enum == ClassicType.MOVIE]
+            music_ids = [like.content_id for like in likes if like.type_enum == ClassicType.MUSIC]
+            episode_ids = [like.content_id for like in likes if like.type_enum == ClassicType.EPISODE]
+        classic_movies = cls.query.filter(
+            cls.delete_time == None,
+            cls.classic_id.in_(movie_ids),
+            cls.type_enum == ClassicType.MOVIE
+        ).all()
+        classic_musics = cls.query.filter(
+            cls.delete_time == None,
+            cls.classic_id.in_(music_ids),
+            cls.type_enum == ClassicType.MUSIC
+        ).all()
+        classic_episodes = cls.query.filter(
+            cls.delete_time == None,
+            cls.classic_id.in_(episode_ids),
+            cls.type_enum == ClassicType.EPISODE
+        ).all()
+        classics = classic_movies + classic_musics + classic_episodes
+        if not classics:
+            raise NotFound(msg='还没有喜欢的期刊')
+        data = cls._get_data(classics)
+        return {
+            'start': start,
+            'count': count,
+            'total': len(data),
+            'models': data[start, start+count]
+        }
+
+    @classmethod
     def _get_single_data(cls, classic):
         model = cls._find_relate_model(classic)
         if not model:
@@ -65,6 +119,18 @@ class Classic(Base):
         fav_nums = Like.get_like_count_for_type(classic.type_enum, model.id)
         res = cls._combine_single_data(classic, model, fav_nums)
         return res
+
+    @classmethod
+    def _get_data(cls, classics):
+        res = cls._find_relate_models(classics)
+        movies = cls._combine_data(res['classic_movies'], res['movies'], res['movies_like_counts'])
+        musics = cls._combine_data(res['classic_musics'], res['musics'], res['musics_like_counts'])
+        episodes = cls._combine_data(res['classic_episodes'], res['episodes'], res['episodes_like_counts'])
+        data = movies + musics + episodes
+        if not data:
+            raise NotFound(msg='期刊相关资源不存在')
+        data.sort(key=lambda x: x.index, reverse=True)
+        return data
 
     @classmethod
     def _find_relate_model(cls, classic):
@@ -126,15 +192,7 @@ class Classic(Base):
         classics = statement.order_by(cls.index.desc()).offset(start).limit(count).all()
         if not classics:
             raise NotFound(msg='相关期刊不存在')
-
-        res = cls._find_relate_models(classics)
-        movies = cls._combine_data(res['classic_movies'], res['movies'], res['movies_like_counts'])
-        musics = cls._combine_data(res['classic_musics'], res['musics'], res['musics_like_counts'])
-        episodes = cls._combine_data(res['classic_episodes'], res['episodes'], res['episodes_like_counts'])
-        data = movies + musics + episodes
-        if not data:
-            raise NotFound(msg='期刊相关资源不存在')
-        data.sort(key=lambda x: x.index, reverse=True)
+        data = cls._get_data(classics)
         return {
             'start': start,
             'count': count,
