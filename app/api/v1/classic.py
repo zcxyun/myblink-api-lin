@@ -40,7 +40,7 @@ def get_detail(type, id):
 @classic_api.route('/<int:type>/<int:id>/favor')
 def get_like(type, id):
     # member_id = get_current_member().id
-    like = Classic.get_like(type, id, 1)
+    like = Like.get_like(type, id, 1)
     return jsonify(like)
 
 
@@ -53,6 +53,6 @@ def get_favor():
 
 
 def classic_with_like_status(classic):
-    like_status = Like.get_like_status_for_member(get_current_member().id, classic.type, classic.id)
+    like_status = Like.get_like_status_by_member(get_current_member().id, classic.type, classic.id)
     classic.like_status = like_status
     classic._fields.append('like_status')

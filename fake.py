@@ -6,7 +6,7 @@ from pprint import pprint
 
 from lin.core import Group, User, Auth
 from lin.db import db
-from sqlalchemy import func
+from sqlalchemy import func, text, desc
 
 from app.app import create_app
 from app.models.book import Book
@@ -67,6 +67,10 @@ def delete_movies():
         db.session.add(movie)
 
 
+def get_movies():
+    pass
+
+
 # 书籍相关
 def delete_books():
     # q = ('%'+'韩寒'+'%').encode('utf-8')
@@ -86,12 +90,13 @@ def get_books():
 
 # 期刊相关
 def get_classic():
-    classic = db.session.query(func.max(Classic.index), Classic).filter_by(delete_time=None).first()
-    print(classic)
+    models = db.session.query(
+        Classic.type, func.count(Classic.type).label('nums')
+    ).group_by('type').order_by(desc('nums')).all()
+    pprint(models)
 
 
 with app.app_context():
-    # get_book()
+    get_classic()
     with db.auto_commit():
-        get_classic()
         pass

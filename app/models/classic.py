@@ -13,7 +13,7 @@ from .base import Base
 class Classic(Base):
     index = Column(Integer, primary_key=True, comment='期刊号')
     classic_id = Column(Integer, comment='期刊在数据中序号，电影,音乐,句子的id 外键')
-    type = Column(SmallInteger, comment='期刊类型,这里的类型分为: 100 电影 200 音乐 300 句子')
+    type = Column(SmallInteger, comment='期刊类型,这里的类型分为: 100 电影 200 音乐 300 句子 400 书籍')
 
     def _set_fields(self):
         self._fields = ['index', 'type', 'classic_id']
@@ -66,18 +66,8 @@ class Classic(Base):
         return res
 
     @classmethod
-    def get_like(cls, classic_type, content_id, member_id):
-        fav_nums = Like.get_like_count_for_type(classic_type, content_id)
-        like_status = Like.get_like_status_for_member(member_id, classic_type, content_id)
-        return {
-            'fav_nums': fav_nums,
-            'like_status': like_status,
-            'id': content_id
-        }
-
-    @classmethod
     def get_favor(cls, member_id, start, count):
-        likes = Like.get_likes_for_member(member_id)
+        likes = Like.get_likes_by_member(member_id)
         movie_ids = []
         music_ids = []
         episode_ids = []
@@ -116,7 +106,7 @@ class Classic(Base):
         model = cls._find_relate_model(classic)
         if not model:
             raise NotFound(msg='找不到和指定期刊关联的资源')
-        fav_nums = Like.get_like_count_for_type(classic.type_enum, model.id)
+        fav_nums = Like.get_like_count_by_type(classic.type_enum, model.id)
         res = cls._combine_single_data(classic, model, fav_nums)
         return res
 
@@ -168,9 +158,9 @@ class Classic(Base):
         musics = Music.get_models_by_ids_with_img_voice(music_ids)
         episodes = Episode.get_models_by_ids_with_img(episode_ids)
         # 获取期刊相关资源点赞数量
-        movies_like_counts = Like.get_like_counts_for_types(ClassicType.MOVIE, movie_ids)
-        musics_like_counts = Like.get_like_counts_for_types(ClassicType.MUSIC, music_ids)
-        episodes_like_counts = Like.get_like_counts_for_types(ClassicType.EPISODE, episode_ids)
+        movies_like_counts = Like.get_like_counts_by_type(ClassicType.MOVIE, movie_ids)
+        musics_like_counts = Like.get_like_counts_by_type(ClassicType.MUSIC, music_ids)
+        episodes_like_counts = Like.get_like_counts_by_type(ClassicType.EPISODE, episode_ids)
 
         return {
             'classic_movies': classic_movies,

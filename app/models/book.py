@@ -31,6 +31,9 @@ class Book(Base):
     image = Column(String(100), comment='书籍封面来自外部链接')
     img_id = Column(Integer, default=0, comment='用户主动上传的图片id')
 
+    def _set_fields(self):
+        self._exclude = ('create_time', 'update_time', 'delete_time')
+
     @property
     def author(self):
         res = self._author if self._author else '[]'
@@ -105,7 +108,7 @@ class Book(Base):
                 book = Book()
                 book.set_attrs(book_dict)
                 if hasattr(book, 'summary'):
-                    book.summary = cls._handle_new_line(book.summary)
+                    book.summary = cls.handle_new_line(book.summary)
                 db.session.add(book)
 
     # @classmethod

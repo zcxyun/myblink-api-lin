@@ -16,6 +16,7 @@ class ClassicType(Enum):
     MOVIE = 100
     MUSIC = 200
     EPISODE = 300
+    BOOK = 400
 
 
 class IsClassic(Enum):

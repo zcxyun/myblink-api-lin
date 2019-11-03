@@ -88,9 +88,9 @@ class Music(Base):
 
     @classmethod
     def _add_img_voice_to_model(cls, model, img_relative_url, img_id, voice_relative_url, voice_id):
-        model.image = cls._get_file_url(img_relative_url)
+        model.image = cls.get_file_url(img_relative_url)
         model.img_id = img_id
-        model.voice = cls._get_file_url(voice_relative_url)
+        model.voice = cls.get_file_url(voice_relative_url)
         model.voice_id = voice_id
         model._fields.extend(['image', 'img_id', 'voice', 'voice_id'])
 

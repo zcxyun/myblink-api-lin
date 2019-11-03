@@ -12,8 +12,10 @@ def create_v1():
     from .token import token_api
     from .member import member_api
     from .classic import classic_api
+    from .like import like_api
     book_api.register(bp_v1)
     token_api.register(bp_v1)
     member_api.register(bp_v1)
     classic_api.register(bp_v1)
+    like_api.register(bp_v1)
     return bp_v1

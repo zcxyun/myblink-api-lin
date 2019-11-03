@@ -46,7 +46,7 @@ def test_get_like():
 
 def test_get_favor():
     with app.test_client() as e:
-        rv = e.get('v1/classic/favor', json={'start': 1, 'count': 2})
+        rv = e.get('v1/classic/favor?page=1&count=2')
         json_data = rv.get_json()
         pprint(json_data)
         assert rv.status_code == 200

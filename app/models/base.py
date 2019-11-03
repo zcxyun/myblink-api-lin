@@ -7,6 +7,8 @@ from lin.core import File
 from lin.exception import ParameterException, NotFound
 from lin.interface import InfoCrud
 
+from app.libs.enum import ClassicType
+
 
 class Base(InfoCrud):
     __abstract__ = True
@@ -112,7 +114,7 @@ class Base(InfoCrud):
         return models
 
     @classmethod
-    def _get_file_url(cls, file_relative_path):
+    def get_file_url(cls, file_relative_path):
         """根据图片表中相对URL合成可访问URL"""
         site_main = current_app.config.get('SITE_DOMAIN', 'http://127.0.0.1:5000')
         file_url = site_main + os.path.join(current_app.static_url_path, file_relative_path)
@@ -120,7 +122,7 @@ class Base(InfoCrud):
 
     @classmethod
     def _add_img_to_model(cls, model, img_relative_url, img_id):
-        model.image = cls._get_file_url(img_relative_url)
+        model.image = cls.get_file_url(img_relative_url)
         model.img_id = img_id
         model._fields.extend(['image', 'img_id'])
 
@@ -172,7 +174,7 @@ class Base(InfoCrud):
         return True
 
     @classmethod
-    def _get_total(cls, q=None):
+    def get_total(cls, q=None):
         """查询模型总数(支持搜索)"""
         statement = cls.query.filter()
         if q:
@@ -181,6 +183,14 @@ class Base(InfoCrud):
         return total
 
     @classmethod
-    def _handle_new_line(cls, text):
+    def handle_new_line(cls, text):
         """处理大文本中的换行"""
         return re.sub(r'\\n', '\\n       ', text) if type(text) == str else ''
+
+    @classmethod
+    def validate_classic_type(cls, classic_type):
+        """校验期刊类型"""
+        try:
+            _ = ClassicType(classic_type)
+        except ValueError:
+            raise ParameterException(msg='期刊类型不正确')
