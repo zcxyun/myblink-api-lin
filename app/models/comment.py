@@ -43,6 +43,7 @@ class Comment(Base):
         ).order_by(
             desc('nums')
         ).offset(start).limit(count).all()
+        comments = [{'content': content, 'nums': nums} for content, nums in comments]
         return comments
 
     @classmethod

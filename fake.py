@@ -9,6 +9,7 @@ from lin.db import db
 from sqlalchemy import func, text, desc
 
 from app.app import create_app
+from app.libs.enum import ClassicType
 from app.models.book import Book
 from app.models.classic import Classic
 from app.models.episode import Episode

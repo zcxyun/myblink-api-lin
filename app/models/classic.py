@@ -68,27 +68,25 @@ class Classic(Base):
     @classmethod
     def get_favor(cls, member_id, start, count):
         likes = Like.get_likes_by_member(member_id)
-        movie_ids = []
-        music_ids = []
-        episode_ids = []
-        if likes:
-            movie_ids = [like.content_id for like in likes if like.type_enum == ClassicType.MOVIE]
-            music_ids = [like.content_id for like in likes if like.type_enum == ClassicType.MUSIC]
-            episode_ids = [like.content_id for like in likes if like.type_enum == ClassicType.EPISODE]
+        if not likes:
+            raise NotFound(msg='还没有喜欢的期刊')
+        movie_ids = [like.content_id for like in likes if like.type_enum == ClassicType.MOVIE]
+        music_ids = [like.content_id for like in likes if like.type_enum == ClassicType.MUSIC]
+        episode_ids = [like.content_id for like in likes if like.type_enum == ClassicType.EPISODE]
         classic_movies = cls.query.filter(
             cls.delete_time == None,
             cls.classic_id.in_(movie_ids),
-            cls.type_enum == ClassicType.MOVIE
+            cls.type == ClassicType.MOVIE.value
         ).all()
         classic_musics = cls.query.filter(
             cls.delete_time == None,
             cls.classic_id.in_(music_ids),
-            cls.type_enum == ClassicType.MUSIC
+            cls.type == ClassicType.MUSIC.value
         ).all()
         classic_episodes = cls.query.filter(
             cls.delete_time == None,
             cls.classic_id.in_(episode_ids),
-            cls.type_enum == ClassicType.EPISODE
+            cls.type == ClassicType.EPISODE.value
         ).all()
         classics = classic_movies + classic_musics + classic_episodes
         if not classics:
@@ -98,7 +96,7 @@ class Classic(Base):
             'start': start,
             'count': count,
             'total': len(data),
-            'models': data[start, start+count]
+            'models': data[start:start+count]
         }
 
     @classmethod
@@ -106,7 +104,7 @@ class Classic(Base):
         model = cls._find_relate_model(classic)
         if not model:
             raise NotFound(msg='找不到和指定期刊关联的资源')
-        fav_nums = Like.get_like_count_by_type(classic.type_enum, model.id)
+        fav_nums = Like.get_like_count_by_type(classic.type, model.id)
         res = cls._combine_single_data(classic, model, fav_nums)
         return res
 
@@ -158,9 +156,9 @@ class Classic(Base):
         musics = Music.get_models_by_ids_with_img_voice(music_ids)
         episodes = Episode.get_models_by_ids_with_img(episode_ids)
         # 获取期刊相关资源点赞数量
-        movies_like_counts = Like.get_like_counts_by_type(ClassicType.MOVIE, movie_ids)
-        musics_like_counts = Like.get_like_counts_by_type(ClassicType.MUSIC, music_ids)
-        episodes_like_counts = Like.get_like_counts_by_type(ClassicType.EPISODE, episode_ids)
+        movies_like_counts = Like.get_like_counts_by_type(ClassicType.MOVIE.value, movie_ids)
+        musics_like_counts = Like.get_like_counts_by_type(ClassicType.MUSIC.value, music_ids)
+        episodes_like_counts = Like.get_like_counts_by_type(ClassicType.EPISODE.value, episode_ids)
 
         return {
             'classic_movies': classic_movies,
