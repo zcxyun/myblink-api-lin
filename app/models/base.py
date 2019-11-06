@@ -13,6 +13,18 @@ from app.libs.enum import ClassicType
 class Base(InfoCrud):
     __abstract__ = True
 
+    @property
+    def create_time(self):
+        if self._create_time is None:
+            return None
+        return self._create_time.strftime('%Y-%m-%d %H:%M:%S')
+
+    @property
+    def update_time(self):
+        if self._update_time is None:
+            return None
+        return self._update_time.strftime('%Y-%m-%d %H:%M:%S')
+
     @classmethod
     def get_model(cls, id, *, err_msg=None):
         """根据ID查询单个模型数据"""
@@ -191,6 +203,6 @@ class Base(InfoCrud):
     def validate_classic_type(cls, classic_type):
         """校验期刊类型"""
         try:
-            _ = ClassicType(classic_type)
+            _ = ClassicType(int(classic_type))
         except ValueError:
             raise ParameterException(msg='期刊类型不正确')

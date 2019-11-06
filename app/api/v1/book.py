@@ -56,7 +56,7 @@ def get_hot_keyword():
 @book_api.route('/<int:book_id>/short_comment', methods=['GET'])
 # @member_login_required
 def get_short_comment(book_id):
-    comments = Comment.get_comments_for_type(ClassicType.BOOK.value, book_id)
+    comments = Comment.get_comments_for_type_one(ClassicType.BOOK.value, book_id)
     return jsonify({
         'book_id': book_id,
         'comments': comments

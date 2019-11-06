@@ -132,7 +132,7 @@ class Like(Base):
 
     @classmethod
     def get_like(cls, classic_type, content_id, member_id):
-        """"""
+        """获取某一会员某一期刊的点赞信息"""
         fav_nums = cls.get_like_count_by_type(classic_type, content_id)
         like_status = cls.get_like_status_by_member(member_id, classic_type, content_id)
         return {
